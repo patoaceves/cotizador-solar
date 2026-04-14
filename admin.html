@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — Cotizador Solar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0C1A11; --s1:#1C2E1E; --s2:#233527; --b1:#2A4432; --b2:#34553F;
+  --cyan:#00FF87; --cdim:rgba(0,255,135,.1); --cring:rgba(0,255,135,.2);
+  --amber:#1ED760; --adim:rgba(30,215,96,.1);
+  --orange:#FB923C; --odim:rgba(251,146,60,.12);
+  --yellow:#FACC15; --ydim:rgba(250,204,21,.12);
+  --green:#34D399; --gdim:rgba(52,211,153,.1);
+  --red:#F87171; --rdim:rgba(248,113,113,.1);
+  --text:#F0FFF4; --t2:#8FB89E; --t3:#6A9A78; --t4:#2A4433;
+  --r:8px; --rL:12px;
+  --sidebar:228px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── LOGIN ───────────────────────────────────── */
+#sc-login{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+#sc-login::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 50%,rgba(30,215,96,.05) 0%,transparent 65%),
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.012) 39px,rgba(255,255,255,.012) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.012) 39px,rgba(255,255,255,.012) 40px);
+}
+.login-box{
+  position:relative;z-index:1;
+  background:var(--s1);border:1px solid var(--b1);border-radius:20px;
+  padding:44px 40px;width:100%;max-width:380px;text-align:center;
+  box-shadow:0 0 60px rgba(0,0,0,.5),0 0 0 1px rgba(0,255,135,.05);
+  animation:fu .5s ease both;
+}
+@keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.login-logo{
+  width:56px;height:56px;
+  background:linear-gradient(135deg,rgba(0,255,135,.15),rgba(30,215,96,.15));
+  border:1px solid var(--b2);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;color:var(--cyan);
+}
+.login-title{font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
+.login-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);margin-bottom:28px;letter-spacing:.06em}
+.login-inp{
+  width:100%;padding:13px 16px;
+  background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);
+  color:var(--text);font-family:'Manrope',sans-serif;font-size:15px;outline:none;
+  transition:border-color .2s;margin-bottom:14px;
+}
+.login-inp::placeholder{color:var(--t3)}.login-inp:focus{border-color:var(--cyan)}
+.login-btn{
+  width:100%;padding:13px;
+  background:var(--cyan);color:#091410;
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;
+  border:none;border-radius:var(--r);cursor:pointer;transition:all .2s;
+  box-shadow:0 0 20px rgba(0,255,135,.2);
+}
+.login-btn:hover{background:#69FF9E;box-shadow:0 0 32px rgba(0,255,135,.35)}
+.login-err{
+  display:none;background:var(--rdim);border:1px solid rgba(248,113,113,.2);
+  color:var(--red);font-size:12px;font-weight:600;
+  padding:10px 14px;border-radius:var(--r);margin-top:12px;
+}
+
+/* ── ADMIN LAYOUT ─────────────────────────────── */
+#sc-admin{display:none;min-height:100vh}
+
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:var(--sidebar);
+  background:var(--s1);border-right:1px solid var(--b1);
+  display:flex;flex-direction:column;z-index:100;overflow-y:auto;
+}
+.sb-brand{padding:22px 18px 18px;border-bottom:1px solid var(--b1)}
+.sb-brand-icon{
+  width:36px;height:36px;
+  background:linear-gradient(135deg,var(--cdim),var(--adim));
+  border:1px solid var(--b2);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--cyan);margin-bottom:12px;
+}
+.sb-name{font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--text)}
+.sb-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);letter-spacing:.06em}
+.sb-nav{flex:1;padding:14px 0}
+.sb-section{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--t4);padding:12px 18px 6px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 18px;color:var(--t3);font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .15s;border-left:2px solid transparent;
+}
+.nav-item svg{flex-shrink:0;width:15px;height:15px}
+.nav-item:hover{color:var(--t2);background:rgba(255,255,255,.03)}
+.nav-item.active{color:var(--text);background:var(--cdim);border-left-color:var(--cyan)}
+.sb-footer{padding:16px 18px;border-top:1px solid var(--b1)}
+.btn-logout{
+  width:100%;padding:9px;
+  background:transparent;border:1px solid var(--b2);color:var(--t3);
+  font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;
+  border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .15s;
+}
+.btn-logout:hover{border-color:var(--t3);color:var(--t2)}
+
+/* Main */
+.main{margin-left:var(--sidebar);min-height:100vh;display:flex;flex-direction:column}
+.topbar{
+  background:var(--s1);border-bottom:1px solid var(--b1);padding:14px 28px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  position:sticky;top:0;z-index:50;
+}
+.tb-title{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--text)}
+.tb-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);margin-top:2px}
+.tb-actions{display:flex;gap:10px;align-items:center;flex-shrink:0}
+.btn-save{
+  display:flex;align-items:center;gap:6px;
+  background:var(--cyan);color:#091410;
+  font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;
+  padding:9px 20px;border-radius:100px;border:none;cursor:pointer;
+  transition:all .15s;box-shadow:0 0 16px rgba(0,255,135,.2);
+}
+.btn-save:hover{background:#69FF9E;box-shadow:0 0 24px rgba(0,255,135,.35)}
+.btn-preview{
+  display:flex;align-items:center;gap:6px;
+  background:none;border:1px solid var(--b2);color:var(--t2);
+  font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;
+  padding:8px 16px;border-radius:100px;cursor:pointer;transition:all .15s;
+  text-decoration:none;
+}
+.btn-preview:hover{border-color:var(--t3);color:var(--text)}
+
+/* Sections */
+.content{padding:28px 28px 80px;max-width:960px}
+.section{display:none}.section.active{display:block}
+.sec-hd{margin-bottom:24px}
+.sec-hd h2{font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;color:var(--text)}
+.sec-hd p{font-size:12px;color:var(--t3);margin-top:4px;line-height:1.5}
+
+/* Cards */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rL);padding:22px;margin-bottom:16px}
+.card-ttl{font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}
+.card-sub{font-size:11px;color:var(--t3);margin-bottom:18px;line-height:1.5}
+
+/* Fields */
+.field{margin-bottom:16px}
+.field label{display:block;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em}
+.field input,.field select,.field textarea{
+  width:100%;padding:11px 14px;
+  background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);
+  font-family:'Manrope',sans-serif;font-size:14px;color:var(--text);outline:none;
+  transition:border-color .2s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan)}
+.field input::placeholder,.field textarea::placeholder{color:var(--t3)}
+.field select option{background:#0B1422}
+.field .hint{font-size:11px;color:var(--t3);margin-top:5px;line-height:1.4}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:640px){.field-row,.field-row-3{grid-template-columns:1fr}}
+
+/* Color field */
+.color-field{display:flex;align-items:center;gap:8px}
+.color-field input[type=color]{width:42px;height:42px;padding:2px;border-radius:var(--r);cursor:pointer;border:1px solid var(--b2);background:var(--s2);flex-shrink:0}
+.color-field input[type=text]{flex:1}
+
+/* HSP grid */
+.hsp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.hsp-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r)}
+.hsp-state{font-size:12px;font-weight:500;flex:1;color:var(--t2)}
+.hsp-inp{width:68px;padding:5px 9px;background:var(--bg);border:1px solid var(--b2);border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;text-align:center;outline:none;color:var(--text);transition:border-color .2s}
+.hsp-inp:focus{border-color:var(--cyan)}
+.hsp-badge{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;padding:2px 8px;border-radius:100px;flex-shrink:0}
+.hb-hi{background:rgba(30,215,96,.15);color:var(--amber);border:1px solid rgba(30,215,96,.2)}
+.hb-md{background:var(--cdim);color:var(--cyan);border:1px solid var(--cring)}
+.hb-lo{background:rgba(255,255,255,.05);color:var(--t3);border:1px solid var(--b2)}
+
+/* Plans CRUD */
+.plan-hd{display:grid;grid-template-columns:1fr 80px 80px 80px 80px 36px;gap:8px;padding:0 0 8px;border-bottom:1px solid var(--b1)}
+.plan-hd span{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--t3)}
+.plan-row{display:grid;grid-template-columns:1fr 80px 80px 80px 80px 36px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--t4)}
+.plan-row:last-child{border-bottom:none}
+.plan-row input{padding:8px 10px;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);font-family:'Manrope',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .2s;width:100%}
+.plan-row input:focus{border-color:var(--cyan)}
+.plan-row select{padding:8px 8px;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);font-family:'Manrope',sans-serif;font-size:12px;color:var(--text);outline:none;width:100%}
+.plan-row select option{background:#0B1422}
+@media(max-width:700px){.plan-hd,.plan-row{grid-template-columns:1fr 70px 70px 36px}}
+.btn-del{width:34px;height:34px;background:var(--rdim);border:1px solid rgba(248,113,113,.15);color:var(--red);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.btn-del:hover{background:rgba(248,113,113,.2)}
+.btn-add{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;padding:10px;margin-top:12px;
+  background:transparent;border:1px dashed var(--b2);color:var(--t3);
+  font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;
+  border-radius:var(--r);cursor:pointer;transition:all .15s;
+}
+.btn-add:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cdim)}
+
+/* Info box */
+.info-box{background:var(--cdim);border:1px solid var(--cring);border-radius:var(--r);padding:14px 16px;font-size:12px;color:var(--t2);line-height:1.55;margin-top:4px}
+.info-box code{display:block;margin-top:10px;font-family:'DM Mono',monospace;font-size:11px;background:rgba(0,0,0,.3);padding:12px;border-radius:6px;white-space:pre;overflow-x:auto;color:var(--cyan);line-height:1.6}
+
+/* Danger zone */
+.danger-btn{
+  background:var(--rdim);border:1px solid rgba(248,113,113,.2);color:var(--red);
+  font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;
+  padding:10px 18px;border-radius:var(--r);cursor:pointer;
+  display:flex;align-items:center;gap:6px;transition:all .15s;
+}
+.danger-btn:hover{background:rgba(248,113,113,.2)}
+
+/* Config preview */
+#config-preview{font-family:'DM Mono',monospace;font-size:11px;color:var(--t2);background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:14px;width:100%;resize:vertical;line-height:1.6;outline:none}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--s2);border:1px solid var(--b2);color:var(--text);padding:12px 18px;border-radius:var(--r);font-size:13px;opacity:0;transform:translateY(12px);transition:all .28s;z-index:9999;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* Badge */
+.badge{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:100px}
+.bg-cyan{background:var(--cdim);color:var(--cyan);border:1px solid var(--cring)}
+.bg-amber{background:var(--adim);color:var(--amber);border:1px solid rgba(30,215,96,.2)}
+.bg-green{background:var(--gdim);color:var(--green);border:1px solid rgba(52,211,153,.2)}
+
+/* Divider */
+.divider{height:1px;background:var(--b1);margin:18px 0}
+
+@media(max-width:900px){
+  :root{--sidebar:200px}
+  .content{padding:24px 20px 60px}
+}
+
+/* ── OVERRIDES: amber como acción principal, Outfit para títulos ── */
+.login-title,.tb-title,.card-ttl,.sec-hd h2,.sb-name{font-family:'Outfit',sans-serif}
+.login-btn{background:var(--amber);color:#0C1A11;box-shadow:0 0 20px rgba(30,215,96,.2)}
+.login-btn:hover{background:#4ADE80;box-shadow:0 0 32px rgba(30,215,96,.35)}
+.btn-save{background:var(--amber);color:#0C1A11;box-shadow:0 0 14px rgba(30,215,96,.15)}
+.btn-save:hover{background:#4ADE80;box-shadow:0 0 24px rgba(30,215,96,.3)}
+.nav-item.active{background:rgba(30,215,96,.07);border-left-color:var(--amber);color:var(--amber)}
+.sb-brand-icon{color:var(--amber)}
+.btn-add:hover{border-color:var(--amber);color:var(--amber);background:rgba(30,215,96,.07)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="sc-login">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+      </svg>
+    </div>
+    <div class="login-title">Panel de Administración</div>
+    <div class="login-sub">Cotizador Solar · Acceso restringido</div>
+    <input class="login-inp" type="password" id="inp-pwd" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">
+      Entrar
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-left:6px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+    </button>
+    <div class="login-err" id="login-err">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Contraseña incorrecta
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="sc-admin">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+      </div>
+      <div class="sb-name" id="sb-name">Solar Admin</div>
+      <div class="sb-sub">Panel de configuración</div>
+    </div>
+
+    <div class="sb-nav">
+      <div class="sb-section">Cotizador</div>
+      <div class="nav-item active" data-s="general" onclick="nav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        General
+      </div>
+      <div class="nav-item" data-s="panel" onclick="nav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Sistema solar
+      </div>
+      <div class="nav-item" data-s="tarifas" onclick="nav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Tarifas CFE
+      </div>
+      <div class="nav-item" data-s="hsp" onclick="nav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        HSP por estado
+      </div>
+      <div class="nav-item" data-s="financing" onclick="nav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Financiamiento
+      </div>
+      <div class="sb-section">Integraciones</div>
+      <div class="nav-item" data-s="webhooks" onclick="nav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Webhooks
+      </div>
+      <div class="sb-section">Sistema</div>
+      <div class="nav-item" data-s="security" onclick="nav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Seguridad
+      </div>
+      <div class="nav-item" data-s="export" onclick="nav(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar config
+      </div>
+    </div>
+
+    <div class="sb-footer">
+      <button class="btn-logout" onclick="logout()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="tb-title" id="tb-title">General</div>
+        <div class="tb-sub" id="tb-sub">Información y branding de la empresa</div>
+      </div>
+      <div class="tb-actions">
+        <a class="btn-preview" href="index.html" target="_blank">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Ver cotizador
+        </a>
+        <button class="btn-save" onclick="saveConfig()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+          Guardar
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── GENERAL ──────────────────────────── -->
+      <div class="section active" id="s-general">
+        <div class="sec-hd">
+          <h2>Información de la empresa</h2>
+          <p>Nombre, logo, colores y textos que aparecen en el cotizador público</p>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Identidad de marca</div>
+          <div class="card-sub">Estos datos aparecen en la pantalla de bienvenida del cotizador</div>
+          <div class="field-row">
+            <div class="field">
+              <label>Nombre de la empresa</label>
+              <input type="text" id="c-name" placeholder="Ej: SolarMax México"/>
+            </div>
+            <div class="field">
+              <label>Color primario (hex)</label>
+              <div class="color-field">
+                <input type="color" id="c-cpick" value="#00FF87" oninput="document.getElementById('c-color').value=this.value">
+                <input type="text" id="c-color" placeholder="#00FF87" oninput="document.getElementById('c-cpick').value=this.value">
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Color de acento (hex)</label>
+              <div class="color-field">
+                <input type="color" id="c-apick" value="#1ED760" oninput="document.getElementById('c-accent').value=this.value">
+                <input type="text" id="c-accent" placeholder="#1ED760" oninput="document.getElementById('c-apick').value=this.value">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Textos de la pantalla de bienvenida</div>
+          <div class="card-sub">Headline y subtítulo visibles al entrar al cotizador</div>
+          <div class="field">
+            <label>Título principal</label>
+            <input type="text" id="c-headline" placeholder="Descubre cuánto puedes ahorrar con energía solar"/>
+          </div>
+          <div class="field">
+            <label>Subtítulo</label>
+            <textarea id="c-sub" rows="2" style="resize:vertical"></textarea>
+          </div>
+          <div class="field">
+            <label>Texto del botón CTA (formulario de contacto)</label>
+            <input type="text" id="c-cta" placeholder="Quiero que me contacten"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PANEL SOLAR ──────────────────────── -->
+      <div class="section" id="s-panel">
+        <div class="sec-hd">
+          <h2>Especificaciones del sistema solar</h2>
+          <p>Datos técnicos y precios que usa el motor de cálculo</p>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Panel solar estándar</div>
+          <div class="card-sub">Modelo que cotizas por defecto. El sistema escalará el número de paneles según el consumo del usuario.</div>
+          <div class="field-row-3">
+            <div class="field">
+              <label>Potencia por panel (W)</label>
+              <input type="number" id="p-watts" placeholder="550" min="100" max="1000"/>
+              <div class="hint">Rango típico: 400–600W</div>
+            </div>
+            <div class="field">
+              <label>Precio por panel (MXN)</label>
+              <input type="number" id="p-price" placeholder="5500" min="1000"/>
+            </div>
+            <div class="field">
+              <label>Costo de instalación (MXN)</label>
+              <input type="number" id="p-install" placeholder="15000" min="0"/>
+              <div class="hint">Cargo fijo independiente de paneles</div>
+            </div>
+          </div>
+          <div class="field-row-3">
+            <div class="field">
+              <label>Factor de eficiencia del sistema</label>
+              <input type="number" id="p-eff" placeholder="0.80" min="0.5" max="1" step="0.01"/>
+              <div class="hint">0.80 = 80%. Incluye inversor, temperatura, cableado</div>
+            </div>
+            <div class="field">
+              <label>Consumo mensual EV (kWh)</label>
+              <input type="number" id="p-ev" placeholder="200" min="0"/>
+              <div class="hint">Se suma si el usuario tiene o planea EV</div>
+            </div>
+            <div class="field">
+              <label>Cargo fijo CFE restante (MXN/mes)</label>
+              <input type="number" id="p-fixed" placeholder="90" min="0"/>
+              <div class="hint">Cargo que persiste aunque no consumas energía</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Proyecciones financieras</div>
+          <div class="card-sub">Parámetros para calcular ROI y ahorro a largo plazo</div>
+          <div class="field-row">
+            <div class="field">
+              <label>Inflación eléctrica anual (%)</label>
+              <input type="number" id="p-inf" placeholder="8" min="0" max="30" step="0.5"/>
+              <div class="hint">CFE ha subido ~8-12% anual históricamente</div>
+            </div>
+            <div class="field">
+              <label>Años de proyección</label>
+              <input type="number" value="25" disabled style="opacity:.4;cursor:not-allowed"/>
+              <div class="hint">Fijo en 25 años (vida útil estándar)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TARIFAS CFE ───────────────────────── -->
+      <div class="section" id="s-tarifas">
+        <div class="sec-hd">
+          <h2>Tarifas eléctricas CFE</h2>
+          <p>Costo efectivo por kWh según la tarifa del usuario. Actualiza cuando CFE modifique sus tarifas.</p>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Tarifas residenciales ($/kWh)</div>
+          <div class="card-sub">
+            <span class="badge bg-amber">Tarifa 1</span> y <span class="badge bg-cyan">DAC</span> son las más comunes para usuarios residenciales. Las intermedias (1A–1F) dependen de la zona climática.
+          </div>
+          <div class="field-row-3">
+            <div class="field"><label>Tarifa 1 <span class="badge bg-amber">Más común</span></label><input type="number" id="t-1" placeholder="1.10" step="0.01"/></div>
+            <div class="field"><label>Tarifa 1A</label><input type="number" id="t-1A" placeholder="1.50" step="0.01"/></div>
+            <div class="field"><label>Tarifa 1B</label><input type="number" id="t-1B" placeholder="1.80" step="0.01"/></div>
+            <div class="field"><label>Tarifa 1C</label><input type="number" id="t-1C" placeholder="2.20" step="0.01"/></div>
+            <div class="field"><label>Tarifa 1D</label><input type="number" id="t-1D" placeholder="2.80" step="0.01"/></div>
+            <div class="field"><label>Tarifa 1E</label><input type="number" id="t-1E" placeholder="3.50" step="0.01"/></div>
+            <div class="field"><label>Tarifa 1F</label><input type="number" id="t-1F" placeholder="4.20" step="0.01"/></div>
+            <div class="field"><label>Tarifa DAC <span class="badge bg-cyan">Alto consumo</span></label><input type="number" id="t-DAC" placeholder="5.50" step="0.01"/></div>
+          </div>
+          <div class="info-box">
+            El cotizador usa <strong>Tarifa 1</strong> como default y <strong>DAC</strong> si el usuario la selecciona. Las tarifas 1A–1F están disponibles para cálculo refinado si el usuario lo sabe.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── HSP ──────────────────────────────── -->
+      <div class="section" id="s-hsp">
+        <div class="sec-hd">
+          <h2>Horas Sol Pico (HSP) por estado</h2>
+          <p>Recurso solar disponible por entidad federativa. Valores basados en datos NREL. Ajusta según tu experiencia de campo.</p>
+        </div>
+        <div class="card">
+          <div class="card-ttl">¿Qué es HSP?</div>
+          <div class="card-sub">
+            Horas Sol Pico = horas al día en que el sol produce 1,000 W/m² (potencia plena). Sonora (6.2 HSP) genera un 38% más energía que Chiapas (4.5 HSP) con los mismos paneles. Este valor determina directamente cuántos paneles recomienda el sistema.
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+            <span class="badge bg-amber">Alto ≥ 6.0 HSP</span>
+            <span class="badge bg-cyan">Medio 5.0 – 5.9 HSP</span>
+            <span class="badge" style="background:rgba(255,255,255,.05);color:var(--t3);border:1px solid var(--b2)">Bajo &lt; 5.0 HSP</span>
+          </div>
+          <div class="hsp-grid" id="hsp-grid"></div>
+        </div>
+      </div>
+
+      <!-- ── FINANCING ─────────────────────────── -->
+      <div class="section" id="s-financing">
+        <div class="sec-hd">
+          <h2>Planes de financiamiento</h2>
+          <p>Aparecen en la sección de resultados del cotizador. Máximo recomendado: 5 planes.</p>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Planes activos</div>
+          <div class="card-sub">
+            Enganche en %. Tasa anual en %. Si la tasa es 0 el cálculo es sin intereses (mensualidades iguales). Plan con <strong>meses = 0</strong> se trata como pago de contado.
+          </div>
+          <div class="plan-hd">
+            <span>Nombre del plan</span><span>Enganche %</span><span>Meses</span><span>Tasa %</span><span>Destacado</span><span></span>
+          </div>
+          <div id="plans-wrap"></div>
+          <button class="btn-add" onclick="addPlan()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar plan de financiamiento
+          </button>
+        </div>
+      </div>
+
+      <!-- ── WEBHOOKS ──────────────────────────── -->
+      <div class="section" id="s-webhooks">
+        <div class="sec-hd">
+          <h2>Webhooks e integraciones</h2>
+          <p>URLs a donde se envían los leads y credenciales de servicios externos</p>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Webhook de leads</div>
+          <div class="card-sub">POST automático con datos del lead y diagnóstico completo cuando el usuario llena el formulario. Compatible con Make, n8n, Zapier, o cualquier endpoint HTTP.</div>
+          <div class="field">
+            <label>URL del webhook</label>
+            <input type="url" id="w-hook" placeholder="https://hook.us1.make.com/xxxxx"/>
+            <div class="hint">Deja vacío para desactivar el envío automático</div>
+          </div>
+          <button class="btn-save" style="width:auto;font-size:12px;padding:8px 18px" onclick="testWebhook()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9,11 12,14 22,4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Probar webhook
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Supabase — URLs permanentes</div>
+          <div class="card-sub">Para que las cotizaciones tengan URL permanente compartible desde cualquier dispositivo. Sin esto solo persisten en la sesión del navegador.</div>
+          <div class="field-row">
+            <div class="field">
+              <label>Supabase Project URL</label>
+              <input type="url" id="w-sburl" placeholder="https://xxxx.supabase.co"/>
+            </div>
+            <div class="field">
+              <label>Supabase Anon Key</label>
+              <input type="text" id="w-sbkey" placeholder="eyJhbGciOiJIUzI1NiIs..."/>
+              <div class="hint">La anon key pública — nunca la service role key</div>
+            </div>
+          </div>
+          <div class="info-box">
+            SQL para crear la tabla (ejecutar en Supabase SQL Editor):<code>create table solar_quotes (
+  id text primary key,
+  answers jsonb,
+  result jsonb,
+  config_snapshot jsonb,
+  lead jsonb,
+  created_at timestamptz default now()
+);
+alter table solar_quotes enable row level security;
+create policy "anon_insert" on solar_quotes for insert with check (true);
+create policy "anon_select" on solar_quotes for select using (true);
+create policy "anon_update" on solar_quotes for update using (true);</code>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECURITY ──────────────────────────── -->
+      <div class="section" id="s-security">
+        <div class="sec-hd">
+          <h2>Seguridad</h2>
+          <p>Contraseña del panel de administración</p>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Cambiar contraseña de acceso</div>
+          <div class="card-sub">La contraseña se almacena en localStorage del navegador donde corre el panel.</div>
+          <div class="field-row-3">
+            <div class="field"><label>Contraseña actual</label><input type="password" id="pwd-old" placeholder="••••••••"/></div>
+            <div class="field"><label>Nueva contraseña</label><input type="password" id="pwd-new" placeholder="••••••••"/></div>
+            <div class="field"><label>Confirmar nueva</label><input type="password" id="pwd-conf" placeholder="••••••••"/></div>
+          </div>
+          <button class="btn-save" style="width:auto;font-size:12px;padding:8px 20px" onclick="changePwd()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Actualizar contraseña
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-ttl" style="color:var(--red)">Zona de peligro</div>
+          <div class="card-sub">Acciones irreversibles</div>
+          <button class="danger-btn" onclick="resetCfg()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Restablecer configuración a valores por defecto
+          </button>
+        </div>
+      </div>
+
+      <!-- ── EXPORT ─────────────────────────────── -->
+      <div class="section" id="s-export">
+        <div class="sec-hd">
+          <h2>Exportar / importar configuración</h2>
+          <p>Respaldo de configuración para transferir entre servidores o mantener historial de cambios</p>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Exportar JSON</div>
+          <div class="card-sub">Descarga la configuración actual como archivo JSON</div>
+          <button class="btn-save" style="width:auto;font-size:12px;padding:8px 20px" onclick="exportCfg()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Descargar config.json
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Importar JSON</div>
+          <div class="card-sub">Carga una configuración exportada previamente. Sobreescribirá la configuración actual.</div>
+          <div class="field">
+            <label>Archivo de configuración (.json)</label>
+            <input type="file" id="import-file" accept=".json" onchange="importCfg(this)" style="color:var(--t2)"/>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-ttl">Config actual (JSON)</div>
+          <div class="card-sub">Vista de solo lectura del JSON almacenado — útil para debugging</div>
+          <textarea id="config-preview" rows="16" readonly></textarea>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /sc-admin -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DEFAULT CONFIG ─────────────────────────────────
+const DEFAULT={
+  company:{name:'Solar',primaryColor:'#00FF87',accentColor:'#1ED760',
+    welcomeHeadline:'Descubre cuánto puedes ahorrar con energía solar',
+    welcomeSub:'Responde 9 preguntas y recibe un diagnóstico personalizado para tu hogar.',
+    ctaText:'Quiero que me contacten'},
+  panel:{watts:550,price:5500,installCost:15000,efficiency:0.80,evMonthlyKwh:200},
+  cfe:{tarifa1:1.10,tarifa1A:1.50,tarifa1B:1.80,tarifa1C:2.20,tarifa1D:2.80,tarifa1E:3.50,tarifa1F:4.20,tarifaDAC:5.50},
+  hsp:{'Aguascalientes':5.5,'Baja California':6.2,'Baja California Sur':6.4,'Campeche':5.2,'Chiapas':4.5,'Chihuahua':6.0,'Ciudad de México':5.1,'Coahuila':5.8,'Colima':5.4,'Durango':5.7,'Guanajuato':5.4,'Guerrero':5.3,'Hidalgo':5.0,'Jalisco':5.3,'Estado de México':4.9,'Michoacán':5.2,'Morelos':5.3,'Nayarit':5.5,'Nuevo León':5.6,'Oaxaca':5.4,'Puebla':5.0,'Querétaro':5.3,'Quintana Roo':5.0,'San Luis Potosí':5.5,'Sinaloa':5.8,'Sonora':6.2,'Tabasco':4.8,'Tamaulipas':5.5,'Tlaxcala':4.9,'Veracruz':4.8,'Yucatán':5.2,'Zacatecas':5.8},
+  financing:[{name:'Contado',downPct:100,months:0,rate:0,featured:false},{name:'12 meses sin intereses',downPct:20,months:12,rate:0,featured:true},{name:'24 meses',downPct:20,months:24,rate:18,featured:false},{name:'36 meses',downPct:20,months:36,rate:24,featured:false}],
+  electricInflation:8,cfeFixedCharge:90,webhook:'',supabaseUrl:'',supabaseKey:'',adminPassword:'solar2024'
+};
+
+function dm(a,b){const o={...a};for(const k of Object.keys(b)){if(Array.isArray(b[k]))o[k]=b[k];else if(b[k]&&typeof b[k]==='object')o[k]=dm(a[k]||{},b[k]);else o[k]=b[k];}return o;}
+
+let CFG={};
+function loadCFG(){try{CFG=dm(DEFAULT,JSON.parse(localStorage.getItem('solarConfig')||'{}'));}catch(e){CFG={...DEFAULT};}}
+
+const gel=id=>document.getElementById(id);
+const st=(id,v)=>{const e=gel(id);if(e)e.textContent=v};
+const sv=(id,v)=>{const e=gel(id);if(e)e.value=v??''};
+const gv=id=>{const e=gel(id);return e?e.value.trim():''};
+const gn=id=>parseFloat(gv(id))||0;
+
+// ── AUTH ──────────────────────────────────────────
+function doLogin(){
+  loadCFG();
+  if(gel('inp-pwd').value===(CFG.adminPassword||DEFAULT.adminPassword)){
+    gel('sc-login').style.display='none';
+    gel('sc-admin').style.display='block';
+    initAdmin();
+  } else {
+    gel('login-err').style.display='block';
+    gel('inp-pwd').value='';
+    gel('inp-pwd').focus();
+  }
+}
+
+function logout(){
+  gel('sc-login').style.display='flex';
+  gel('sc-admin').style.display='none';
+  gel('inp-pwd').value='';
+  gel('login-err').style.display='none';
+}
+
+// ── NAVIGATION ────────────────────────────────────
+const META={
+  general:{title:'General',sub:'Información y branding de la empresa'},
+  panel:{title:'Sistema solar',sub:'Especificaciones técnicas y precios'},
+  tarifas:{title:'Tarifas CFE',sub:'Costo del kWh por tarifa eléctrica'},
+  hsp:{title:'HSP por estado',sub:'Recurso solar disponible por entidad federativa'},
+  financing:{title:'Financiamiento',sub:'Planes de pago disponibles en el cotizador'},
+  webhooks:{title:'Webhooks',sub:'Integraciones con servicios externos'},
+  security:{title:'Seguridad',sub:'Contraseña del panel de administración'},
+  export:{title:'Exportar / importar',sub:'Respaldo de configuración JSON'},
+};
+
+function nav(el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  const s=el.dataset.s;
+  document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+  gel('s-'+s).classList.add('active');
+  const m=META[s]||{};
+  st('tb-title',m.title||s); st('tb-sub',m.sub||'');
+  if(s==='export')refreshPreview();
+}
+
+// ── INIT ──────────────────────────────────────────
+function initAdmin(){
+  // General
+  sv('c-name',CFG.company.name);
+  sv('c-color',CFG.company.primaryColor);
+  sv('c-cpick',CFG.company.primaryColor);
+  sv('c-accent',CFG.company.accentColor);
+  sv('c-apick',CFG.company.accentColor);
+  sv('c-headline',CFG.company.welcomeHeadline);
+  sv('c-sub',CFG.company.welcomeSub);
+  sv('c-cta',CFG.company.ctaText);
+  // Panel
+  sv('p-watts',CFG.panel.watts);sv('p-price',CFG.panel.price);sv('p-install',CFG.panel.installCost);
+  sv('p-eff',CFG.panel.efficiency);sv('p-ev',CFG.panel.evMonthlyKwh||200);sv('p-fixed',CFG.cfeFixedCharge);
+  sv('p-inf',CFG.electricInflation);
+  // CFE
+  sv('t-1',CFG.cfe.tarifa1);sv('t-1A',CFG.cfe.tarifa1A);sv('t-1B',CFG.cfe.tarifa1B);sv('t-1C',CFG.cfe.tarifa1C);
+  sv('t-1D',CFG.cfe.tarifa1D);sv('t-1E',CFG.cfe.tarifa1E);sv('t-1F',CFG.cfe.tarifa1F);sv('t-DAC',CFG.cfe.tarifaDAC);
+  // HSP
+  renderHSP();
+  // Plans
+  plans=[...(CFG.financing||DEFAULT.financing)];
+  redrawPlans();
+  // Webhooks
+  sv('w-hook',CFG.webhook||'');sv('w-sburl',CFG.supabaseUrl||'');sv('w-sbkey',CFG.supabaseKey||'');
+  // Sidebar name
+  st('sb-name',(CFG.company.name||'Solar')+' Admin');
+}
+
+// ── HSP ───────────────────────────────────────────
+function renderHSP(){
+  const states=Object.keys(DEFAULT.hsp).sort();
+  gel('hsp-grid').innerHTML=states.map(state=>{
+    const v=CFG.hsp[state]||DEFAULT.hsp[state];
+    const cls=v>=6?'hb-hi':v<5?'hb-lo':'hb-md';
+    const lbl=v>=6?'Alto':v<5?'Bajo':'Medio';
+    return`<div class="hsp-item">
+      <span class="hsp-state">${state}</span>
+      <input class="hsp-inp" type="number" id="hsp-${state.replace(/\s/g,'_')}" value="${v}" min="2" max="8" step="0.1"/>
+      <span class="hsp-badge ${cls}">${lbl}</span>
+    </div>`;
+  }).join('');
+  gel('hsp-grid').querySelectorAll('.hsp-inp').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const n=parseFloat(inp.value);
+      const b=inp.nextElementSibling;
+      b.className='hsp-badge '+(n>=6?'hb-hi':n<5?'hb-lo':'hb-md');
+      b.textContent=n>=6?'Alto':n<5?'Bajo':'Medio';
+    });
+  });
+}
+
+function readHSP(){
+  const h={};
+  Object.keys(DEFAULT.hsp).forEach(s=>{
+    const id='hsp-'+s.replace(/\s/g,'_');
+    const el=gel(id);
+    h[s]=el?parseFloat(el.value)||DEFAULT.hsp[s]:DEFAULT.hsp[s];
+  });
+  return h;
+}
+
+// ── FINANCING CRUD ────────────────────────────────
+let plans=[];
+
+function redrawPlans(){
+  gel('plans-wrap').innerHTML=plans.map((p,i)=>`
+    <div class="plan-row">
+      <input type="text"   value="${p.name}"    placeholder="Nombre del plan" onchange="plans[${i}].name=this.value"/>
+      <input type="number" value="${p.downPct}" placeholder="20"  min="0" max="100" onchange="plans[${i}].downPct=+this.value"/>
+      <input type="number" value="${p.months}"  placeholder="12"  min="0"           onchange="plans[${i}].months=+this.value"/>
+      <input type="number" value="${p.rate}"    placeholder="0"   min="0" step="0.5" onchange="plans[${i}].rate=+this.value"/>
+      <select onchange="plans[${i}].featured=this.value==='true'">
+        <option value="false"${!p.featured?' selected':''}>No</option>
+        <option value="true" ${p.featured?' selected':''}>Destacado</option>
+      </select>
+      <button class="btn-del" onclick="delPlan(${i})" title="Eliminar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+function addPlan(){ plans.push({name:'Nuevo plan',downPct:20,months:24,rate:12,featured:false}); redrawPlans(); }
+function delPlan(i){ if(plans.length<=1){toast('Debe haber al menos un plan');return;} plans.splice(i,1); redrawPlans(); }
+
+// ── SAVE CONFIG ───────────────────────────────────
+function saveConfig(){
+  const newCFG={
+    company:{name:gv('c-name')||'Solar',primaryColor:gv('c-color')||'#00FF87',accentColor:gv('c-accent')||'#1ED760',
+      welcomeHeadline:gv('c-headline'),welcomeSub:gv('c-sub'),ctaText:gv('c-cta')},
+    panel:{watts:gn('p-watts')||550,price:gn('p-price')||5500,installCost:gn('p-install')||15000,
+      efficiency:gn('p-eff')||0.80,evMonthlyKwh:gn('p-ev')||200},
+    cfe:{tarifa1:gn('t-1')||1.10,tarifa1A:gn('t-1A')||1.50,tarifa1B:gn('t-1B')||1.80,tarifa1C:gn('t-1C')||2.20,
+      tarifa1D:gn('t-1D')||2.80,tarifa1E:gn('t-1E')||3.50,tarifa1F:gn('t-1F')||4.20,tarifaDAC:gn('t-DAC')||5.50},
+    hsp:readHSP(),
+    financing:plans,
+    electricInflation:gn('p-inf')||8,
+    cfeFixedCharge:gn('p-fixed')||90,
+    webhook:gv('w-hook'),supabaseUrl:gv('w-sburl'),supabaseKey:gv('w-sbkey'),
+    adminPassword:CFG.adminPassword||DEFAULT.adminPassword
+  };
+  try{localStorage.setItem('solarConfig',JSON.stringify(newCFG));CFG=newCFG;st('sb-name',(newCFG.company.name||'Solar')+' Admin');toast('Configuración guardada correctamente');}
+  catch(e){toast('Error al guardar: '+e.message);}
+}
+
+// ── WEBHOOK TEST ──────────────────────────────────
+async function testWebhook(){
+  const url=gv('w-hook'); if(!url){toast('Ingresa primero la URL del webhook');return;}
+  const p={test:true,name:'Test Lead',phone:'8110000000',quoteId:'TEST01',timestamp:new Date().toISOString(),result:{panels:8,systemKw:'4.4',investment:59000,coverage:92,roiYrs:'5.2'}};
+  try{await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p),mode:'no-cors'});toast('Test enviado — verifica en Make/Zapier');}
+  catch(e){toast('Error al enviar: '+e.message);}
+}
+
+// ── CHANGE PASSWORD ───────────────────────────────
+function changePwd(){
+  const old=gel('pwd-old').value, nw=gel('pwd-new').value, conf=gel('pwd-conf').value;
+  if(old!==(CFG.adminPassword||DEFAULT.adminPassword)){toast('Contraseña actual incorrecta');return;}
+  if(!nw||nw.length<6){toast('La nueva contraseña debe tener al menos 6 caracteres');return;}
+  if(nw!==conf){toast('Las contraseñas no coinciden');return;}
+  CFG.adminPassword=nw; localStorage.setItem('solarConfig',JSON.stringify(CFG));
+  gel('pwd-old').value='';gel('pwd-new').value='';gel('pwd-conf').value='';
+  toast('Contraseña actualizada');
+}
+
+// ── RESET ─────────────────────────────────────────
+function resetCfg(){
+  if(!confirm('¿Restablecer toda la configuración a valores por defecto? Esta acción no se puede deshacer.'))return;
+  localStorage.removeItem('solarConfig'); loadCFG(); initAdmin(); toast('Configuración restablecida');
+}
+
+// ── EXPORT / IMPORT ───────────────────────────────
+function exportCfg(){
+  const data=localStorage.getItem('solarConfig')||JSON.stringify(DEFAULT,null,2);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+  a.download='solar-config-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); URL.revokeObjectURL(a.href); toast('Config exportada');
+}
+
+function importCfg(input){
+  const f=input.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const imported=JSON.parse(e.target.result);
+      if(!confirm('¿Importar esta configuración? Sobreescribirá la actual.'))return;
+      localStorage.setItem('solarConfig',JSON.stringify(imported));
+      loadCFG(); initAdmin(); toast('Configuración importada correctamente');
+    }catch(err){toast('Error: archivo JSON inválido');}
+  };
+  r.readAsText(f); input.value='';
+}
+
+function refreshPreview(){
+  const raw=localStorage.getItem('solarConfig');
+  try{gel('config-preview').value=JSON.stringify(JSON.parse(raw||'{}'),null,2);}catch(e){gel('config-preview').value=raw||'{}';}
+}
+
+// ── TOAST / KEYBOARD ──────────────────────────────
+let _tt; function toast(m){const e=gel('toast');e.textContent=m;e.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>e.classList.remove('show'),3500);}
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();if(gel('sc-admin').style.display!=='none')saveConfig();}});
+</script>
+</body>
+</html>
