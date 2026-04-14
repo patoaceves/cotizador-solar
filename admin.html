@@ -313,19 +313,10 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
         Financiamiento
       </div>
-      <div class="sb-section">Integraciones</div>
-      <div class="nav-item" data-s="webhooks" onclick="nav(this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        Webhooks
-      </div>
       <div class="sb-section">Sistema</div>
       <div class="nav-item" data-s="security" onclick="nav(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         Seguridad
-      </div>
-      <div class="nav-item" data-s="export" onclick="nav(this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Exportar config
       </div>
     </div>
 
@@ -538,55 +529,6 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
         </div>
       </div>
 
-      <!-- ── WEBHOOKS ──────────────────────────── -->
-      <div class="section" id="s-webhooks">
-        <div class="sec-hd">
-          <h2>Webhooks e integraciones</h2>
-          <p>URLs a donde se envían los leads y credenciales de servicios externos</p>
-        </div>
-        <div class="card">
-          <div class="card-ttl">Webhook de leads</div>
-          <div class="card-sub">POST automático con datos del lead y diagnóstico completo cuando el usuario llena el formulario. Compatible con Make, n8n, Zapier, o cualquier endpoint HTTP.</div>
-          <div class="field">
-            <label>URL del webhook</label>
-            <input type="url" id="w-hook" placeholder="https://hook.us1.make.com/xxxxx"/>
-            <div class="hint">Deja vacío para desactivar el envío automático</div>
-          </div>
-          <button class="btn-save" style="width:auto;font-size:12px;padding:8px 18px" onclick="testWebhook()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9,11 12,14 22,4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            Probar webhook
-          </button>
-        </div>
-        <div class="card">
-          <div class="card-ttl">Supabase — URLs permanentes</div>
-          <div class="card-sub">Para que las cotizaciones tengan URL permanente compartible desde cualquier dispositivo. Sin esto solo persisten en la sesión del navegador.</div>
-          <div class="field-row">
-            <div class="field">
-              <label>Supabase Project URL</label>
-              <input type="url" id="w-sburl" placeholder="https://xxxx.supabase.co"/>
-            </div>
-            <div class="field">
-              <label>Supabase Anon Key</label>
-              <input type="text" id="w-sbkey" placeholder="eyJhbGciOiJIUzI1NiIs..."/>
-              <div class="hint">La anon key pública — nunca la service role key</div>
-            </div>
-          </div>
-          <div class="info-box">
-            SQL para crear la tabla (ejecutar en Supabase SQL Editor):<code>create table solar_quotes (
-  id text primary key,
-  answers jsonb,
-  result jsonb,
-  config_snapshot jsonb,
-  lead jsonb,
-  created_at timestamptz default now()
-);
-alter table solar_quotes enable row level security;
-create policy "anon_insert" on solar_quotes for insert with check (true);
-create policy "anon_select" on solar_quotes for select using (true);
-create policy "anon_update" on solar_quotes for update using (true);</code>
-          </div>
-        </div>
-      </div>
 
       <!-- ── SECURITY ──────────────────────────── -->
       <div class="section" id="s-security">
@@ -614,35 +556,6 @@ create policy "anon_update" on solar_quotes for update using (true);</code>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             Restablecer configuración a valores por defecto
           </button>
-        </div>
-      </div>
-
-      <!-- ── EXPORT ─────────────────────────────── -->
-      <div class="section" id="s-export">
-        <div class="sec-hd">
-          <h2>Exportar / importar configuración</h2>
-          <p>Respaldo de configuración para transferir entre servidores o mantener historial de cambios</p>
-        </div>
-        <div class="card">
-          <div class="card-ttl">Exportar JSON</div>
-          <div class="card-sub">Descarga la configuración actual como archivo JSON</div>
-          <button class="btn-save" style="width:auto;font-size:12px;padding:8px 20px" onclick="exportCfg()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Descargar config.json
-          </button>
-        </div>
-        <div class="card">
-          <div class="card-ttl">Importar JSON</div>
-          <div class="card-sub">Carga una configuración exportada previamente. Sobreescribirá la configuración actual.</div>
-          <div class="field">
-            <label>Archivo de configuración (.json)</label>
-            <input type="file" id="import-file" accept=".json" onchange="importCfg(this)" style="color:var(--t2)"/>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-ttl">Config actual (JSON)</div>
-          <div class="card-sub">Vista de solo lectura del JSON almacenado — útil para debugging</div>
-          <textarea id="config-preview" rows="16" readonly></textarea>
         </div>
       </div>
 
@@ -705,9 +618,7 @@ const META={
   tarifas:{title:'Tarifas CFE',sub:'Costo del kWh por tarifa eléctrica'},
   hsp:{title:'HSP por estado',sub:'Recurso solar disponible por entidad federativa'},
   financing:{title:'Financiamiento',sub:'Planes de pago disponibles en el cotizador'},
-  webhooks:{title:'Webhooks',sub:'Integraciones con servicios externos'},
   security:{title:'Seguridad',sub:'Contraseña del panel de administración'},
-  export:{title:'Exportar / importar',sub:'Respaldo de configuración JSON'},
 };
 
 function nav(el){
@@ -718,7 +629,6 @@ function nav(el){
   gel('s-'+s).classList.add('active');
   const m=META[s]||{};
   st('tb-title',m.title||s); st('tb-sub',m.sub||'');
-  if(s==='export')refreshPreview();
 }
 
 // ── INIT ──────────────────────────────────────────

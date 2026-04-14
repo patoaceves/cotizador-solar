@@ -147,6 +147,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;heigh
 .rtop{background:var(--s1);border-bottom:1px solid var(--b1);padding:36px 24px 40px;text-align:center;position:relative;overflow:hidden}
 .rtop::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 50% 100%,rgba(30,215,96,.07) 0%,transparent 65%)}
 .rbadge{display:inline-flex;align-items:center;gap:6px;background:var(--cdim);border:1px solid rgba(0,255,135,.2);color:var(--cyan);font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:16px}
+.rtag{display:inline-flex;align-items:center;gap:6px;background:rgba(0,255,135,.08);border:1px solid rgba(0,255,135,.18);color:var(--cyan);font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:100px}
+.rtag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0}
+.rtag-dot{color:var(--t4);font-size:12px}
 .rtitle{font-family:'Syne',sans-serif;font-size:clamp(24px,4.5vw,40px);font-weight:800;color:var(--text);margin-bottom:8px}
 .rsub{font-family:'DM Mono',monospace;font-size:12px;color:var(--t3)}
 .rbody{max-width:1120px;margin:0 auto;padding:36px 24px 100px;width:100%}
@@ -404,12 +407,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;heigh
 <!-- RESULTS -->
 <div id="sc-r" class="screen">
   <div class="rtop">
-    <div class="rbadge">
-      <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
-      Diagnóstico listo
-    </div>
     <h1 class="rtitle">Tu solución solar personalizada</h1>
-    <p class="rsub" id="rsub">— kWp · — · — HSP/día</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <span class="rtag" id="rtag-kw">—</span>
+      <span class="rtag-dot">·</span>
+      <span class="rtag" id="rtag-state">—</span>
+      <span class="rtag-dot">·</span>
+      <span class="rtag" id="rtag-hsp">—</span>
+    </div>
   </div>
 
   <div class="rbody">
@@ -462,10 +467,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;heigh
       </div>
       <div class="card sys-box">
         <div class="sys-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-        <div class="sys-tag">Sistema en</div>
+        <div class="sys-tag">Potencia del sistema</div>
         <div class="sys-val" id="sys-kw">—</div>
         <div class="sys-unit">kilowatts pico (kWp)</div>
-        <div class="sys-tag" id="sys-hsp" style="margin-top:4px">—</div>
+        <div style="height:1px;background:var(--b1);width:100%;margin:4px 0"></div>
+        <div style="font-size:11px;color:var(--t3);line-height:1.55;text-align:center;padding:0 4px">
+          El kWp mide la potencia máxima que produce tu sistema en condiciones óptimas de sol.
+        </div>
+        <div class="sys-tag" id="sys-hsp" style="margin-top:2px">—</div>
       </div>
     </div>
 
@@ -671,7 +680,7 @@ function renderQ(q){
       <div class="sl-ends"><span>${q.ends[0]}</span><span>${q.ends[1]}</span></div>`;
   } else if(q.type==='select'){
     const v=ans[q.id]||'';
-    body=`<select class="styled-sel" id="qsel"><option value="">Selecciona tu estado...</option>${q.options.map(o=>`<option value="${o}"${v===o?' selected':''}>${o}</option>`).join('')}</select>`;
+    body=`<select class="styled-sel" id="qsel"><option value="">Selecciona tu Estado...</option>${q.options.map(o=>`<option value="${o}"${v===o?' selected':''}>${o}</option>`).join('')}</select>`;
   } else if(q.type==='cards'){
     const v=ans[q.id]||'';
     body=`<div class="opts-grid">${q.opts.map(o=>`<div class="opt${v===o.v?' sel':''}" data-v="${o.v}" onclick="pickCard(event,'${q.id}')"><div class="opt-ico">${o.i}</div><div><div class="opt-lbl">${o.lbl}</div>${o.sub?`<div class="opt-sub">${o.sub}</div>`:''}</div></div>`).join('')}</div>`;
@@ -774,7 +783,7 @@ const NUM=n=>Math.round(n).toLocaleString('es-MX');
 
 function showResults(r){
   showSc('sc-r');
-  st('rsub',`Sistema ${r.systemKw} kWp · ${r.state} · ${r.hsp} HSP/día`);
+  st('rtag-kw',`Sistema ${r.systemKw} kWp`); st('rtag-state',r.state); st('rtag-hsp',`${r.hsp} HSP/día`);
   st('k-panels',r.panels+' paneles'); st('k-invest',MXN(r.invest));
   st('k-roi',r.roiYrs+' años'); st('k-s25',MXN(r.tot25));
   st('d-pct',r.cov+'%'); st('d-sol',`${r.cov}% · ${MXN(r.mBill*r.cov/100)}/mes`);
